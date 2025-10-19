@@ -1,0 +1,7 @@
+[
+  {
+    "id": "case_1",
+    "input": "The quick brown fox jumps over the lazy dog. This is a sentence used to demonstrate all the letters of the alphabet.",
+    "expected_keyword": "fox"
+  }
+]
