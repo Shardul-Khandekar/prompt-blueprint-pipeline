@@ -28,7 +28,7 @@ for case in test_cases:
     print(f"Running test case: {case['id']}")
 
     # Hydrate prompt with test case data
-    hydrated_prompt = prompt_template.replace("{article}", case["input"])
+    hydrated_prompt = prompt_template.format(article_text=case["input"])
 
     print(f"Hydrated Prompt: {hydrated_prompt}")
 
