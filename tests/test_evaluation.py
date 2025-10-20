@@ -58,11 +58,11 @@ for case in test_cases:
 
     # Update and run the evaluation prompt
     try:
-        eval_prompt_hydrated = evaluation_template.format(input=case["input"])
-        eval_prompt_hydrated = eval_prompt_hydrated.format(
-            ideal_output=case["ideal_output"])
-        eval_prompt_hydrated = eval_prompt_hydrated.format(
-            output=actual_output)
+        # Use direct replace to avoid KeyError from chained .format() calls
+        # and to avoid issues if the supplied texts contain braces.
+        eval_prompt_hydrated = evaluation_template.replace("{input}", case.get("input", ""))
+        eval_prompt_hydrated = eval_prompt_hydrated.replace("{ideal_output}", case.get("ideal_output", ""))
+        eval_prompt_hydrated = eval_prompt_hydrated.replace("{output}", actual_output)
 
         # Capture JSON output from evaluator
         eval_response = client.chat.completions.create(
