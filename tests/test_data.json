@@ -1,7 +1,7 @@
 [
   {
     "id": "case_1",
-    "input": "The quick brown fox jumps over the lazy dog. This is a sentence used to demonstrate all the letters of the alphabet.",
-    "expected_keyword": "fox"
+    "input": "The solar system has eight planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune. Jupiter is the largest, a gas giant, while Mars is known as the Red Planet. Earth is the third planet from the sun.",
+    "ideal_output": "• The solar system has eight planets (Mercury to Neptune).\n• Jupiter is noted as the largest planet.\n• Mars is known as the Red Planet and Earth is third from the sun."
   }
 ]
