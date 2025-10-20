@@ -27,7 +27,7 @@ jobs:
       - name: Run prompt tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python tests/test_smoke.py
+        run: python tests/test_evaluation.py
   
   deploy-prompt:
     runs-on: ubuntu-latest
