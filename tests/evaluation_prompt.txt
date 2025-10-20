@@ -1,0 +1,30 @@
+You are an expert quality assurance evaluator. Your task is to grade an AI-generated summary based on a rubric.
+
+You will be given the original article, the ideal "golden" summary, and the AI's actual summary.
+
+Evaluate the "Actual Summary" on two criteria:
+1.  **Accuracy (Score 1-5):** Does the summary correctly represent the facts from the original article? (1=Completely inaccurate, 5=Perfectly accurate)
+2.  **Conciseness (Score 1-5):** Is the summary concise and to the point, as requested by the original prompt? (1=Very verbose, 5=Perfectly concise)
+
+Original Article:
+---
+{input}
+---
+
+Ideal Summary:
+---
+{ideal_output}
+---
+
+Actual Summary (to be graded):
+---
+{output}
+---
+
+Provide your evaluation *only* in the following JSON format. Do not add any other text, just the JSON object:
+{
+  "accuracy_score": <score_int>,
+  "accuracy_reasoning": "<your reasoning for the score>",
+  "conciseness_score": <score_int>,
+  "conciseness_reasoning": "<your reasoning for the score>"
+}
