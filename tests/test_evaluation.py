@@ -87,6 +87,37 @@ def run_quality_test(case, hydrated_prompt):
         return False
 
 
+def run_format_test(case, hydrated_prompt):
+    """
+    Runs a simple regex-based format test.
+    """
+    print("Running 'format' test...")
+    try:
+        response = client.chat.completions.create(
+            model=generator_model,
+            messages=[{"role": "user", "content": hydrated_prompt}]
+        )
+        actual_output = response.choices[0].message.content.strip()
+        print(f"Model Output:\n{actual_output}")
+
+        if case["expected_format"] == "starts_with_bullet":
+            # Regex to check for common bullet point markers (•, *, -)
+            # at the very beginning of the string (^)
+            if re.match(r"^[•*-]", actual_output):
+                print("PASS: Output correctly starts with a bullet point.")
+                return True
+            else:
+                print("FAIL: Output does not start with a bullet point.")
+                return False
+
+        print(f"FAIL: Unknown format type '{case['expected_format']}'")
+        return False
+
+    except Exception as e:
+        print(f"FAIL: Test execution error: {e}")
+        return False
+
+
 # Iterate through each test case
 for case in test_cases:
     print(f"Running test case: {case['id']}")
