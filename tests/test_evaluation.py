@@ -1,6 +1,7 @@
 import os
 import json
 from openai import OpenAI
+import re
 
 generator_model = "gpt-3.5-turbo"
 evaluator_model = "gpt-4o"
@@ -34,16 +35,14 @@ except FileNotFoundError as e:
     exit(1)
 
 print(f"Loaded {len(test_cases)} test case(s).")
-tests_failed = False
+test_results = []
 
-# Iterate through each test case
-for case in test_cases:
-    print(f"Running test case: {case['id']}")
 
-    # Update the prompt template with the test case input
+def run_quality_test(case, hydrated_prompt):
+    """
+    Runs the LLM as evaluator for quality test
+    """
     try:
-        hydrated_prompt = prompt_template.format(article_text=case["input"])
-
         response = client.chat.completions.create(
             model=generator_model,
             messages=[{"role": "user", "content": hydrated_prompt}]
@@ -51,18 +50,12 @@ for case in test_cases:
         actual_output = response.choices[0].message.content
         print(f"Model Output:\n{actual_output}")
 
-    except Exception as e:
-        print(f"FAIL: API call failed for model {generator_model}. Error: {e}")
-        tests_failed = True
-        continue
-
-    # Update and run the evaluation prompt
-    try:
-        # Use direct replace to avoid KeyError from chained .format() calls
-        # and to avoid issues if the supplied texts contain braces.
-        eval_prompt_hydrated = evaluation_template.replace("{input}", case.get("input", ""))
-        eval_prompt_hydrated = eval_prompt_hydrated.replace("{ideal_output}", case.get("ideal_output", ""))
-        eval_prompt_hydrated = eval_prompt_hydrated.replace("{output}", actual_output)
+        eval_prompt_hydrated = evaluation_template.replace(
+            "{input}", case.get("input", ""))
+        eval_prompt_hydrated = eval_prompt_hydrated.replace(
+            "{ideal_output}", case.get("ideal_output", ""))
+        eval_prompt_hydrated = eval_prompt_hydrated.replace(
+            "{output}", actual_output)
 
         # Capture JSON output from evaluator
         eval_response = client.chat.completions.create(
@@ -81,26 +74,26 @@ for case in test_cases:
         acc_score = evaluation.get("accuracy_score", 0)
         con_score = evaluation.get("conciseness_score", 0)
 
-        if acc_score < score_threshold:
+        if acc_score < score_threshold or con_score < score_threshold:
             print(
                 f"FAIL: Accuracy score ({acc_score}) is below threshold ({score_threshold}).")
             print(f"Reason: {evaluation.get('accuracy_reasoning')}")
-            tests_failed = True
+            return False
         else:
             print(f"PASS: Accuracy score: {acc_score}")
+            return True
+    except Exception as e:
+        print(f"FAIL: Test execution error: {e}")
+        return False
 
-        if con_score < score_threshold:
-            print(
-                f"FAIL: Conciseness score ({con_score}) is below threshold ({score_threshold}).")
-            print(f"Reason: {evaluation.get('conciseness_reasoning')}")
-            tests_failed = True
-        else:
-            print(f"PASS: Conciseness score: {con_score}")
 
-    except json.JSONDecodeError:
-        print(f"FAIL: Evaluator model did not return valid JSON.")
-        print(f"Raw output: {eval_json_str}")
-        tests_failed = True
+# Iterate through each test case
+for case in test_cases:
+    print(f"Running test case: {case['id']}")
+
+    # Update the prompt template with the test case input
+    try:
+        hydrated_prompt = prompt_template.format(article_text=case["input"])
 
     except Exception as e:
         print(
