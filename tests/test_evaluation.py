@@ -157,15 +157,35 @@ for case in test_cases:
     # Update the prompt template with the test case input
     try:
         hydrated_prompt = prompt_template.format(article_text=case["input"])
+        test_type = case.get("test_type")
+
+        test_passed = False
+        if test_type == "quality":
+            test_passed = run_quality_test(case, hydrated_prompt)
+        elif test_type == "format":
+            test_passed = run_format_test(case, hydrated_prompt)
+        elif test_type == "guardrail_injection":
+            test_passed = run_guardrail_test(case, hydrated_prompt)
+        else:
+            print(f"WARNING: Unknown test_type '{test_type}'. Skipping.")
+            continue
+
+        test_results.append(test_passed)
 
     except Exception as e:
         print(
             f"FAIL: API call failed for evaluator model {evaluator_model}. Error: {e}")
         tests_failed = True
 
-if tests_failed:
-    print("\n--- Evaluation FAILED. ---")
+print("\n--- Test Run Complete ---")
+total_tests = len(test_results)
+passed_tests = sum(1 for result in test_results if result)
+
+print(f"Summary: {passed_tests} / {total_tests} tests passed.")
+
+if passed_tests < total_tests:
+    print("Some tests failed. Failing the build.")
     exit(1)
 else:
-    print("\n--- All evaluations PASSED. ---")
+    print("All tests passed. Proceeding to deploy.")
     exit(0)
